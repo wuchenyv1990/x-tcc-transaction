@@ -1,14 +1,14 @@
 package com.wcyv90.x.tcc.order.domain.service;
 
 import com.wcyv90.x.tcc.order.domain.model.Order;
-import com.wcyv90.x.tcc.order.domain.model.PayInfo;
+import com.wcyv90.x.tcc.order.domain.model.PayOrderInfo;
 
 public interface OrderManager {
 
-    Order tryPayOrder(PayInfo payInfo);
+    Order tryPayOrder(PayOrderInfo payOrderInfo);
 
-    void confirmPayOrder(PayInfo payInfo);
+    void confirmPayOrder(PayOrderInfo payOrderInfo);
 
-    void cancelPayOrder(PayInfo payInfo);
+    void cancelPayOrder(PayOrderInfo payOrderInfo);
 
 }

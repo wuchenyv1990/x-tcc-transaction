@@ -10,7 +10,7 @@ public class TccTransaction {
 
     private Phase phase = Phase.TRYING;
 
-    private Type type = Type.MAIN;
+    private Type type = Type.ROOT;
 
     /**
      * 分派补偿动作
@@ -41,8 +41,8 @@ public class TccTransaction {
      * 自动恢复从主事务触发
      */
     public static enum Type {
-        MAIN,
-        SUB;
+        ROOT,
+        BRANCH;
     }
 
     public String getTccTxId() {

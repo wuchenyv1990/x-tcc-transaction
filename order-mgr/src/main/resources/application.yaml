@@ -1,0 +1,19 @@
+server:
+  port: 8082
+
+mybatis:
+  config-location: classpath:mybatis/config.xml
+  mapper-locations: classpath:mybatis/mapper/*.xml
+
+#dataSource 配置
+spring:
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: >
+        jdbc:mysql://127.0.0.1:3306/X_ORDER_MGR
+        ?useUnicode=true
+        &serverTimezone=GMT%2B8
+        &characterEncoding=utf-8
+        &allowMutiQueries=true
+    username: root
+    password: root

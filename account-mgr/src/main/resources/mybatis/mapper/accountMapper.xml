@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wcyv90.x.tcc.account.service.mapper.AccountMapper">
+    <resultMap id="account" type="com.wcyv90.x.tcc.account.domain.model.Account">
+        <id column="ID" property="id"/>
+        <result column="TOTAL_AMOUNT" property="totalAmount"/>
+        <result column="UPDATE_TIME" property="updateTime"/>
+    </resultMap>
+
+    <select id="getById" resultMap="account">
+        SELECT
+            `ID`,
+            `TOTAL_AMOUNT`,
+            `UPDATE_TIME`
+        FROM
+            `X_ACCOUNT`
+        WHERE
+            `ID`=#{id}
+    </select>
+
+    <update id="update">
+        UPDATE
+            `X_ACCOUNT`
+        SET
+            `TOTAL_AMOUNT`=#{account.totalAmount}, `UPDATE_TIME`=now()
+        WHERE
+            `ID`=#{account.id}
+    </update>
+
+</mapper>

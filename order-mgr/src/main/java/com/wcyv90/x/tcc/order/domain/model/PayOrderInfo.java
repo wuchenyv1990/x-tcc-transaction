@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Builder
 @Data
-public class PayInfo {
+public class PayOrderInfo {
 
     Long orderId;
 

@@ -31,11 +31,11 @@ public class TccTransactionManager {
 
             tccTransaction.setTccTxId(tccContext.getTccTxId());
             tccTransaction.setPhase(tccContext.getPhase());
-            tccTransaction.setType(TccTransaction.Type.SUB);
+            tccTransaction.setType(TccTransaction.Type.BRANCH);
         } else {
             tccTransaction.setTccTxId(UUID.randomUUID().toString());
             tccTransaction.setPhase(TccTransaction.Phase.TRYING);
-            tccTransaction.setType(TccTransaction.Type.MAIN);
+            tccTransaction.setType(TccTransaction.Type.ROOT);
         }
         TCC_HOLDER.set(tccTransaction);
         return tccTransaction;
