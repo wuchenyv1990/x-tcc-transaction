@@ -11,7 +11,7 @@ public class TccContextInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate requestTemplate) {
-        TccTransaction tccTx = TccTransactionManager.createTccTx();
+        TccTransaction tccTx = TccTransactionManager.currentTccTx();
         if (tccTx != null) {
             TccContext tccContext = new TccContext();
             tccContext.setTccTxId(tccTx.getTccTxId());

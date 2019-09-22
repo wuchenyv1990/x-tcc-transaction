@@ -14,9 +14,8 @@ public class PayController {
     PayService payService;
 
     @PutMapping("/pay")
-    public boolean pay(@RequestBody PayInfoDTO payInfoDTO) {
-        return payService.pay(payInfoDTO.to());
-
+    public void pay(@RequestBody PayInfoDTO payInfoDTO) {
+        payService.pay(payInfoDTO.to());
     }
 
 }

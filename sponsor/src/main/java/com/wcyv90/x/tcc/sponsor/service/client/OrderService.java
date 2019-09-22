@@ -4,6 +4,7 @@ import com.wcyv90.x.tcc.sponsor.domain.dto.PayOrderInfoDTO;
 import com.wcyv90.x.tcc.tx.feign.TccFeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
         name = "orderService",
@@ -13,12 +14,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 public interface OrderService {
 
     @PutMapping("/pay/try")
-    void tryPay(PayOrderInfoDTO payOrderInfoDTO);
+    void tryPay(@RequestBody PayOrderInfoDTO payOrderInfoDTO);
 
     @PutMapping("/pay/confirm")
-    void confirmPay(PayOrderInfoDTO payOrderInfoDTO);
+    void confirmPay(@RequestBody PayOrderInfoDTO payOrderInfoDTO);
 
     @PutMapping("/pay/cancel")
-    void cancelPay(PayOrderInfoDTO payOrderInfoDTO);
+    void cancelPay(@RequestBody PayOrderInfoDTO payOrderInfoDTO);
 
 }

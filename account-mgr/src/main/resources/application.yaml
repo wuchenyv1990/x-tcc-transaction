@@ -3,7 +3,7 @@ server:
 
 mybatis:
   config-location: classpath:mybatis/config.xml
-  mapper-locations: classpath:mybatis/mapper/*.xml
+  mapper-locations: classpath*:mybatis/mapper/*.xml
 
 #dataSource 配置
 spring:

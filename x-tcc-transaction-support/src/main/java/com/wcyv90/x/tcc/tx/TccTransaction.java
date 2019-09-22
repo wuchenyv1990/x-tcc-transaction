@@ -108,4 +108,9 @@ public class TccTransaction {
     public void setRetryTimes(Long retryTimes) {
         this.retryTimes = retryTimes;
     }
+
+    public void retried() {
+        retryTimes++;
+    }
+
 }

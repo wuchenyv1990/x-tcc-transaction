@@ -1,6 +1,9 @@
 server:
   port: 8081
 
+mybatis:
+  config-location: classpath:mybatis/config.xml
+  mapper-locations: classpath*:mybatis/mapper/*.xml #扫描tcc-support包的xml
 #dataSource 配置
 spring:
   datasource:

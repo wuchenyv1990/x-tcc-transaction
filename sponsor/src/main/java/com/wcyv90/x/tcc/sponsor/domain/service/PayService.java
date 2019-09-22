@@ -4,6 +4,6 @@ import com.wcyv90.x.tcc.sponsor.domain.model.PayInfo;
 
 public interface PayService {
 
+    void pay(PayInfo payInfo);
 
-    boolean pay(PayInfo payInfo);
 }
