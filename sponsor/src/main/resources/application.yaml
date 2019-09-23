@@ -11,7 +11,7 @@ spring:
     url: >
         jdbc:mysql://127.0.0.1:3306/X_SPONSOR
         ?useUnicode=true
-        &serverTimezone=GMT%2B8
+        &serverTimezone=Asia/Shanghai
         &characterEncoding=utf-8
         &allowMutiQueries=true
     username: root

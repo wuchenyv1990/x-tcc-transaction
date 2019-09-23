@@ -12,7 +12,7 @@ spring:
     url: >
         jdbc:mysql://127.0.0.1:3306/X_ACCOUNT_MGR
         ?useUnicode=true
-        &serverTimezone=GMT%2B8
+        &serverTimezone=UTC
         &characterEncoding=utf-8
         &allowMutiQueries=true
     username: root

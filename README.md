@@ -5,4 +5,4 @@
 <li>预留资源：try阶段直接扣款，`X_TCC_TRANSACTION`表记录tcc事务状态</li>
 <li>定时任务：对try和cancel状态的`X_TCC_TRANSACTION`进行cancel操作</li>
 <li>定时任务：对cofirm状态的`X_TCC_TRANSACTION`进行confirm操作</li>
-<li>confirm：表不记录状态，因此直接删除当前`X_TCC_TRANSACTION`/li>
+<li>confirm：业务表不记录状态，因此直接删除当前`X_TCC_TRANSACTION`/li>

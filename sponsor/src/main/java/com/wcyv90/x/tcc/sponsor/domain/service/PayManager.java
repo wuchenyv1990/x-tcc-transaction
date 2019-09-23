@@ -6,11 +6,7 @@ public interface PayManager {
 
     void tryPay(PayInfo payInfo);
 
-    void confirming();
-
     void confirmPay(PayInfo payInfo);
-
-    void canceling();
 
     void cancelPay(PayInfo payInfo);
 

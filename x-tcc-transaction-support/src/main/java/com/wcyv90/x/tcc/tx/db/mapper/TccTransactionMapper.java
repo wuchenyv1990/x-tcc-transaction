@@ -13,6 +13,6 @@ public interface TccTransactionMapper {
 
     void update(@Param("tccTx") TccTransaction tccTransaction);
 
-    TccTransaction delete(String tccTxId);
+    void delete(String tccTxId);
 
 }

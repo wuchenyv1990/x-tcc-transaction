@@ -1,5 +1,6 @@
 package com.wcyv90.x.tcc.sponsor.service;
 
+import com.wcyv90.x.tcc.common.JsonMapper;
 import com.wcyv90.x.tcc.sponsor.domain.dto.PayAccountInfoDTO;
 import com.wcyv90.x.tcc.sponsor.domain.dto.PayOrderInfoDTO;
 import com.wcyv90.x.tcc.sponsor.domain.model.PayInfo;
@@ -7,10 +8,15 @@ import com.wcyv90.x.tcc.sponsor.domain.service.PayManager;
 import com.wcyv90.x.tcc.sponsor.domain.service.PayService;
 import com.wcyv90.x.tcc.sponsor.service.client.AccountService;
 import com.wcyv90.x.tcc.sponsor.service.client.OrderService;
+import com.wcyv90.x.tcc.tx.TccTransactionManager;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.wcyv90.x.tcc.sponsor.infra.Constant.PAY_EVENT;
+
 @Service
+@Slf4j
 public class PayServiceImpl implements PayService {
 
     @Autowired
@@ -22,23 +28,30 @@ public class PayServiceImpl implements PayService {
     @Autowired
     AccountService accountService;
 
+    @Autowired
+    TccTransactionManager tccTransactionManager;
+
     /**
-     *  try 主事务try成功才继续
+     * try 主事务try成功才继续
      *
      * @param payInfo payInfo
      */
     @Override
     public void pay(PayInfo payInfo) {
-        payManager.tryPay(payInfo); //主事务表：trying
-        try {
-            orderService.tryPay(PayOrderInfoDTO.from(payInfo));
-            accountService.tryPay(PayAccountInfoDTO.from(payInfo));
-            payManager.confirming(); //主事务表：confirming
-            confirmPay(payInfo);
-        } catch (Exception e) {
-            payManager.canceling(); //主事务表：canceling，这里不操作也不影响补偿
-            cancelPay(payInfo);
-        }
+        tccTransactionManager.withRootTcc(PAY_EVENT, JsonMapper.dumps(payInfo),
+                () -> {
+                    log.info("Root tcc local action.");
+                    payManager.tryPay(payInfo);
+                },
+                () -> {
+                    log.info("Root tcc remote call.");
+                    orderService.tryPay(PayOrderInfoDTO.from(payInfo));
+                    accountService.tryPay(PayAccountInfoDTO.from(payInfo));
+                    log.info("Root tcc remote call success.");
+                },
+                () -> confirmPay(payInfo),
+                () -> cancelPay(payInfo)
+        );
     }
 
     /**
@@ -48,19 +61,24 @@ public class PayServiceImpl implements PayService {
      * @param payInfo payInfo
      */
     public void confirmPay(PayInfo payInfo) {
+        log.info("Root confirm.");
         orderService.confirmPay(PayOrderInfoDTO.from(payInfo));
         accountService.confirmPay(PayAccountInfoDTO.from(payInfo));
         payManager.confirmPay(payInfo);
+        log.info("Root confirm success.");
     }
 
     /**
      * cancel 幂等，都调用成功才算成功，主事务表删除
+     *
      * @param payInfo payInfo
      */
     public void cancelPay(PayInfo payInfo) {
+        log.info("Root cancel.");
         orderService.cancelPay(PayOrderInfoDTO.from(payInfo));
         accountService.cancelPay(PayAccountInfoDTO.from(payInfo));
         payManager.cancelPay(payInfo);
+        log.info("Root cancel success.");
     }
 
 }
