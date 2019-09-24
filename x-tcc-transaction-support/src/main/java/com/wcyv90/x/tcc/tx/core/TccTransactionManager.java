@@ -188,7 +188,7 @@ public class TccTransactionManager {
         if (TCC_HOLDER.get() != null) {
             throw new IllegalStateException("Create new tccTransaction but already exists.");
         }
-        TccContext tccContext = getTccContext();
+        TccContext tccContext = TCC_CONTEXT_HOLDER.get();
         TccTransaction tccTransaction = new TccTransaction();
         if (tccContext != null) {
             tccTransaction.setTccTxId(tccContext.getTccTxId());
@@ -208,10 +208,6 @@ public class TccTransactionManager {
         TCC_HOLDER.set(tccTransaction);
         LOGGER.info("Trying with TccTxId: {}", tccTransaction.getTccTxId());
         return tryLocalAction.get();
-    }
-
-    private TccContext getTccContext() {
-        return JsonMapper.load(getRequest().getHeader(TCC_HEADER), TccContext.class);
     }
 
     /**
