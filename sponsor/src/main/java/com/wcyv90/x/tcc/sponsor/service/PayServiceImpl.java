@@ -8,7 +8,7 @@ import com.wcyv90.x.tcc.sponsor.domain.service.PayManager;
 import com.wcyv90.x.tcc.sponsor.domain.service.PayService;
 import com.wcyv90.x.tcc.sponsor.service.client.AccountService;
 import com.wcyv90.x.tcc.sponsor.service.client.OrderService;
-import com.wcyv90.x.tcc.tx.TccTransactionManager;
+import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

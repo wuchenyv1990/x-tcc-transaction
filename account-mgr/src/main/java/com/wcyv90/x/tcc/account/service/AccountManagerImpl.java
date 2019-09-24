@@ -6,7 +6,7 @@ import com.wcyv90.x.tcc.account.domain.service.AccountManager;
 import com.wcyv90.x.tcc.account.domain.service.AccountRepo;
 import com.wcyv90.x.tcc.common.JsonMapper;
 import com.wcyv90.x.tcc.common.exception.AppException;
-import com.wcyv90.x.tcc.tx.TccTransactionManager;
+import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 
 import static com.wcyv90.x.tcc.account.infra.Constant.PAY_ACCOUNT_EVENT;
+import static com.wcyv90.x.tcc.common.util.ExceptionGenerator.probablyThrow;
 
 @Service
 @Slf4j
@@ -34,6 +35,7 @@ public class AccountManagerImpl implements AccountManager {
                     payAccountInfo.getAccountId(),
                     payAccountInfo.getAmount()
             );
+            probablyThrow();
             Account account = accountRepo.getById(payAccountInfo.getAccountId())
                     .orElseThrow(AppException::new);
             BigDecimal totalAmount = account.getTotalAmount();
@@ -54,6 +56,7 @@ public class AccountManagerImpl implements AccountManager {
                     payAccountInfo.getAccountId(),
                     payAccountInfo.getAmount()
             );
+            probablyThrow();
             Account account = accountRepo.getById(payAccountInfo.getAccountId())
                     .orElseThrow(AppException::new);
             account.setTotalAmount(account.getTotalAmount().add(payAccountInfo.getAmount()));
@@ -69,6 +72,7 @@ public class AccountManagerImpl implements AccountManager {
                     payAccountInfo.getAccountId(),
                     payAccountInfo.getAmount()
             );
+            probablyThrow();
         });
     }
 }

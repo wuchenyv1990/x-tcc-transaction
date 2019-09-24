@@ -16,3 +16,7 @@ spring:
         &allowMutiQueries=true
     username: root
     password: root
+
+logging:
+  level:
+    com.wcyv90.x.tcc.tx.core: debug

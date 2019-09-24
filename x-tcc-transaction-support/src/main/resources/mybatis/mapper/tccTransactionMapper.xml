@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.wcyv90.x.tcc.tx.db.mapper.TccTransactionMapper">
-    <resultMap type="com.wcyv90.x.tcc.tx.TccTransaction" id="tccTx">
+    <resultMap type="com.wcyv90.x.tcc.tx.core.TccTransaction" id="tccTx">
         <id column="ID" property="id"/>
         <result column="TCC_TX_ID" property="tccTxId"/>
         <result column="PHASE" property="phase"/>

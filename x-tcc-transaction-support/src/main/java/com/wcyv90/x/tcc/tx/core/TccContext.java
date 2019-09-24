@@ -1,8 +1,6 @@
-package com.wcyv90.x.tcc.tx;
+package com.wcyv90.x.tcc.tx.core;
 
 public class TccContext {
-
-    public static final String TCC_HEADER = "X-tcc-context";
 
     private String tccTxId;
 

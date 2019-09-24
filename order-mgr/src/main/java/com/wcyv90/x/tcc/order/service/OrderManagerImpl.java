@@ -6,13 +6,14 @@ import com.wcyv90.x.tcc.order.domain.model.Order;
 import com.wcyv90.x.tcc.order.domain.model.PayOrderInfo;
 import com.wcyv90.x.tcc.order.domain.service.OrderManager;
 import com.wcyv90.x.tcc.order.domain.service.OrderRepo;
-import com.wcyv90.x.tcc.tx.TccTransactionManager;
+import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+import static com.wcyv90.x.tcc.common.util.ExceptionGenerator.probablyThrow;
 import static com.wcyv90.x.tcc.order.infra.Constant.PAY_ORDER_EVENT;
 
 @Service
@@ -32,6 +33,7 @@ public class OrderManagerImpl implements OrderManager {
                     payOrderInfo.getOrderId(),
                     payOrderInfo.getAmount()
             );
+            probablyThrow();
             Order order = orderRepo.getById(payOrderInfo.getOrderId()).orElseThrow(AppException::new);
             BigDecimal addedAmount = order.getPaidAmount().add(payOrderInfo.getAmount());
             if (addedAmount.compareTo(order.getPriceAmount()) > 0) {
@@ -51,6 +53,7 @@ public class OrderManagerImpl implements OrderManager {
                     payOrderInfo.getOrderId(),
                     payOrderInfo.getAmount()
             );
+            probablyThrow();
         });
     }
 
@@ -61,8 +64,10 @@ public class OrderManagerImpl implements OrderManager {
                     payOrderInfo.getOrderId(),
                     payOrderInfo.getAmount()
             );
+            probablyThrow();
             Order order = orderRepo.getById(payOrderInfo.getOrderId()).orElseThrow(AppException::new);
             order.setPaidAmount(order.getPaidAmount().subtract(payOrderInfo.getAmount()));
+            orderRepo.update(order);
             log.info("Cancel success.");
         });
     }

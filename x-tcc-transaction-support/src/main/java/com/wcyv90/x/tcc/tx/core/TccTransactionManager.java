@@ -1,4 +1,4 @@
-package com.wcyv90.x.tcc.tx;
+package com.wcyv90.x.tcc.tx.core;
 
 import com.wcyv90.x.tcc.common.JsonMapper;
 import com.wcyv90.x.tcc.tx.db.mapper.TccTransactionMapper;
@@ -15,12 +15,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.wcyv90.x.tcc.common.ServletUtil.getRequest;
-import static com.wcyv90.x.tcc.tx.TccContext.TCC_HEADER;
+import static com.wcyv90.x.tcc.tx.core.TccEnvFilter.TCC_HEADER;
 
 @Service
 public class TccTransactionManager {
 
     private static final ThreadLocal<TccTransaction> TCC_HOLDER = new InheritableThreadLocal<>();
+
+    private static final ThreadLocal<TccContext> TCC_CONTEXT_HOLDER = new InheritableThreadLocal<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccTransactionManager.class);
 
@@ -28,10 +30,23 @@ public class TccTransactionManager {
     private TccTransactionMapper tccTransactionMapper;
 
     @Autowired
-    TccTransactionManager tccTransactionManager;
+    private TccTransactionManager tccTransactionManager;
 
     public static TccTransaction currentTccTx() {
         return TCC_HOLDER.get();
+    }
+
+    public static void setContext(TccContext tccContext) {
+        TCC_CONTEXT_HOLDER.set(tccContext);
+    }
+
+    public static void setContext(TccTransaction tccTransaction) {
+        TCC_HOLDER.set(tccTransaction);
+    }
+
+    public static void clearContext() {
+        TCC_HOLDER.remove();
+        TCC_CONTEXT_HOLDER.remove();
     }
 
     /**
@@ -126,12 +141,15 @@ public class TccTransactionManager {
             Runnable confirmAction,
             Runnable cancelAction
     ) {
+        LOGGER.debug("TccMgr begin trying root local.");
         U localResult = tccTransactionManager.trying(event, compensationInfo, tryLocalAction);
         try {
+            LOGGER.debug("TccMgr begin trying remote.");
             T result = tryRemoteAction.apply(localResult);
             tccTransactionManager.confirm(confirmAction);
             return result;
         } catch (Exception e) {
+            LOGGER.error("TccMgr catch remote exception.");
             tccTransactionManager.cancel(cancelAction);
             throw e;
         }
@@ -145,6 +163,7 @@ public class TccTransactionManager {
      * @param action            补偿调用动作
      */
     public void branchTry(String event, String compensationInfo, Runnable action) {
+        LOGGER.debug("TccMgr begin try branch.");
         trying(event, compensationInfo, () -> {
             action.run();
             return null;
@@ -152,6 +171,7 @@ public class TccTransactionManager {
     }
 
     public <T> T branchTry(String event, String compensationInfo, Supplier<T> action) {
+        LOGGER.debug("TccMgr begin try branch.");
         return trying(event, compensationInfo, action);
     }
 
@@ -183,6 +203,7 @@ public class TccTransactionManager {
             tccTransaction.setCompensationEvent(event);
             tccTransaction.setCompensationInfo(info);
         }
+        LOGGER.debug("TccMgr saving context, TccTxId: {}", tccTransaction.getTccTxId());
         tccTransactionMapper.save(tccTransaction);
         TCC_HOLDER.set(tccTransaction);
         LOGGER.info("Trying with TccTxId: {}", tccTransaction.getTccTxId());
@@ -201,6 +222,7 @@ public class TccTransactionManager {
     @Transactional
     public void confirm(Runnable confirmAction) {
         tccTransactionManager.confirming();
+        LOGGER.debug("Tcc status: confirming, tccTxId: {}", extractTccTxId().orElse(null));
         confirmAction.run();
         tccTransactionManager.done();
     }
@@ -228,6 +250,7 @@ public class TccTransactionManager {
     public void cancel(Runnable cancelAction) {
         if (needCancel()) {
             tccTransactionManager.canceling();
+            LOGGER.debug("Tcc status: canceling, tccTxId: {}", extractTccTxId().orElse(null));
             cancelAction.run();
             tccTransactionManager.done();
         }
@@ -248,13 +271,15 @@ public class TccTransactionManager {
     }
 
     /**
-     * 有事务记录表示需要执行操作
+     * 有事务记录，且状态不为confirming表示需要执行操作
      *
      * @return bool
      */
     private boolean needCancel() {
-        return extractTccTxId().isPresent()
-                && tccTransactionMapper.getByTccTxId(extractTccTxId().get()).isPresent();
+        String tccTxId = extractTccTxId().orElseThrow(() -> new IllegalStateException("Cancel tx but have no tccTxId"));
+        Optional<TccTransaction> txxTxOpt = tccTransactionMapper.getByTccTxId(tccTxId);
+        return (txxTxOpt.isPresent())
+                && !TccTransaction.Phase.CONFIRMING.equals(txxTxOpt.map(TccTransaction::getPhase).orElse(null));
     }
 
     /**
@@ -265,7 +290,7 @@ public class TccTransactionManager {
     private Optional<String> extractTccTxId() {
         TccTransaction tccTransaction = TCC_HOLDER.get();
         if (tccTransaction == null) {
-            TccContext tccContext = getTccContext();
+            TccContext tccContext = TCC_CONTEXT_HOLDER.get();
             return Optional.ofNullable(tccContext).map(TccContext::getTccTxId);
         } else {
             return Optional.ofNullable(tccTransaction.getTccTxId());

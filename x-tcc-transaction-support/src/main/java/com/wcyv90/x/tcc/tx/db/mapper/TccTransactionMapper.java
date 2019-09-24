@@ -1,6 +1,6 @@
 package com.wcyv90.x.tcc.tx.db.mapper;
 
-import com.wcyv90.x.tcc.tx.TccTransaction;
+import com.wcyv90.x.tcc.tx.core.TccTransaction;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Optional;
