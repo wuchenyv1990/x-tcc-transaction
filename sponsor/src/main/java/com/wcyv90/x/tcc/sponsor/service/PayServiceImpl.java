@@ -38,6 +38,9 @@ public class PayServiceImpl implements PayService {
      */
     @Override
     public void pay(PayInfo payInfo) {
+
+        //可能提前准备一些各服务间所需的交互数据，then:
+
         tccTransactionManager.withRootTcc(PAY_EVENT, JsonMapper.dumps(payInfo),
                 () -> {
                     log.info("Root tcc local action.");
