@@ -1,4 +1,4 @@
-package com.wcyv90.x.tcc.common;
+package com.wcyv90.x.tcc.common.util;
 
 import com.wcyv90.x.tcc.common.exception.AppException;
 import org.springframework.web.context.request.RequestContextHolder;

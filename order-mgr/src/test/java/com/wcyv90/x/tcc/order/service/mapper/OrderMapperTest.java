@@ -28,7 +28,7 @@ public class OrderMapperTest {
     @Test
     @Transactional(readOnly = true)
     public void shouldGetByIdSuccess() {
-        Optional<Order> resultOpt = orderMapper.getById(1L);
+        Optional<Order> resultOpt = orderMapper.getByIdForUpdate(1L);
         assertNotNull(resultOpt);
         assertNotNull(resultOpt.get());
     }
@@ -39,7 +39,7 @@ public class OrderMapperTest {
         BigDecimal paidAmount = AmountDecimal.defaultPrecision("10.5");
         Order updatedOrder = Order.builder().id(1L).paidAmount(paidAmount).build();
         orderMapper.update(updatedOrder);
-        assertEquals(paidAmount, orderMapper.getById(1L).get().getPaidAmount());
+        assertEquals(paidAmount, orderMapper.getByIdForUpdate(1L).get().getPaidAmount());
     }
 
 }

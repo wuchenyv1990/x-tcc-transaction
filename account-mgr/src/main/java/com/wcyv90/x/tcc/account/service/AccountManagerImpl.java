@@ -42,7 +42,10 @@ public class AccountManagerImpl implements AccountManager {
             if (totalAmount.compareTo(payAccountInfo.getAmount()) < 0) {
                 throw new AppException();
             }
-            account.setTotalAmount(totalAmount.subtract(payAccountInfo.getAmount()));
+            BigDecimal subtractedAmount = totalAmount.subtract(payAccountInfo.getAmount());
+            log.info("set account {} -> {}", account.getTotalAmount(), subtractedAmount);
+
+            account.setTotalAmount(subtractedAmount);
             accountRepo.update(account);
             log.info("Try success.");
         });
@@ -59,7 +62,10 @@ public class AccountManagerImpl implements AccountManager {
             probablyThrow();
             Account account = accountRepo.getById(payAccountInfo.getAccountId())
                     .orElseThrow(AppException::new);
-            account.setTotalAmount(account.getTotalAmount().add(payAccountInfo.getAmount()));
+            BigDecimal addAmount = account.getTotalAmount().add(payAccountInfo.getAmount());
+            log.info("cancel account {} -> {}", account.getTotalAmount(), addAmount);
+
+            account.setTotalAmount(addAmount);
             accountRepo.update(account);
             log.info("Cancel success.");
         });

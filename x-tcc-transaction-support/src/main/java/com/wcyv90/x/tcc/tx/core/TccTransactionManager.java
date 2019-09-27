@@ -1,6 +1,5 @@
 package com.wcyv90.x.tcc.tx.core;
 
-import com.wcyv90.x.tcc.common.JsonMapper;
 import com.wcyv90.x.tcc.tx.db.mapper.TccTransactionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +13,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.wcyv90.x.tcc.common.ServletUtil.getRequest;
-import static com.wcyv90.x.tcc.tx.core.TccEnvFilter.TCC_HEADER;
+import static com.wcyv90.x.tcc.tx.core.TccTransaction.Phase.CONFIRMING;
 
 @Service
 public class TccTransactionManager {
@@ -52,12 +50,12 @@ public class TccTransactionManager {
     /**
      * 调用不用加@Transactional
      *
-     * @param event             事务动作名，补偿线程触发补偿
-     * @param compensationInfo  补偿所需数据，比如入参的json
-     * @param tryLocalAction    本地事务动作
-     * @param tryRemoteAction   远程调用动作
-     * @param confirmAction     本地&远程confirmAction
-     * @param cancelAction      本地&远程cancelAction
+     * @param event            事务动作名，补偿线程触发补偿
+     * @param compensationInfo 补偿所需数据，比如入参的json
+     * @param tryLocalAction   本地事务动作
+     * @param tryRemoteAction  远程调用动作
+     * @param confirmAction    本地&远程confirmAction
+     * @param cancelAction     本地&远程cancelAction
      */
     public void withRootTcc(
             String event,
@@ -81,38 +79,9 @@ public class TccTransactionManager {
     }
 
     /**
-     * 调用不用加@Transactional
-     *
-     * @param event             事务动作名，补偿线程触发补偿
-     * @param compensationInfo  补偿所需数据，比如入参的json
-     * @param tryLocalAction    本地事务动作
-     * @param tryRemoteAction   远程调用动作，有返回值
-     * @param confirmAction     本地&远程confirmAction
-     * @param cancelAction      本地&远程cancelAction
-     * @param <T>               本地+远程 业务返回值
-     * @return                  业务返回值
-     */
-    public <T> T withRootTcc(
-            String event,
-            String compensationInfo,
-            Runnable tryLocalAction,
-            Supplier<T> tryRemoteAction,
-            Runnable confirmAction,
-            Runnable cancelAction
-    ) {
-        return withRootTcc(event, compensationInfo,
-                () -> {
-                    tryLocalAction.run();
-                    return null;
-                },
-                (empty) -> tryRemoteAction.get(),
-                confirmAction,
-                cancelAction);
-    }
-
-    /**
-     * 调用不用@Transactional
-     * confirm && cancel 接口需要一致性，此次为有tcc事务表记录则进行操作
+     * 调用不要再加@Transactional<br>，本地事务和远程事务分开
+     * confirm && cancel 接口需要补偿数据的一致性，幂等由TCCManager根据tcc事务表记录实现了
+     * <li>0.  需要交换数的数据需要提前调用准备</li>
      * <li>1.  事务表记录trying && 本地事务，原子性</li>
      * <li>2.1 远程调用，成功->[2.1]，失败->[3.1]</li>
      * <li>2.2 远程调用成功，变更状态为confirming（新事务执行），失败->[3.1]</li>
@@ -124,14 +93,14 @@ public class TccTransactionManager {
      * <li>3.3 尝试远程和本地cancel && done删除事务记录，原子性，失败事务状态不变，由恢复线程执行3.1.1</li>
      * <li>3.4 cancel成功，满足一致性</li>
      *
-     * @param event             事务动作名，补偿线程触发补偿
-     * @param compensationInfo  补偿所需数据，比如入参的json
-     * @param tryLocalAction    本地事务动作，返回U
-     * @param tryRemoteAction   远程调用动作，U入参，返回值T
-     * @param confirmAction     本地&远程confirmAction
-     * @param cancelAction      本地&远程cancelAction
-     * @param <T>               本地+远程 业务返回值
-     * @return                  业务返回值
+     * @param event            事务动作名，补偿线程触发补偿
+     * @param compensationInfo 补偿所需数据，比如入参的json
+     * @param tryLocalAction   本地事务动作，返回U
+     * @param tryRemoteAction  远程调用动作，U入参，返回值T
+     * @param confirmAction    本地&远程confirmAction
+     * @param cancelAction     本地&远程cancelAction
+     * @param <T>              本地+远程 业务返回值
+     * @return 业务返回值
      */
     public <T, U> T withRootTcc(
             String event,
@@ -158,13 +127,13 @@ public class TccTransactionManager {
     /**
      * 分支事务try
      *
-     * @param event             事务动作名，补偿线程触发补偿
-     * @param compensationInfo  补偿所需数据，比如入参的json
-     * @param action            补偿调用动作
+     * @param event            事务动作名，补偿线程触发补偿
+     * @param compensationInfo 补偿所需数据，比如入参的json
+     * @param action           补偿调用动作
      */
     public void branchTry(String event, String compensationInfo, Runnable action) {
         LOGGER.debug("TccMgr begin try branch.");
-        trying(event, compensationInfo, () -> {
+        tccTransactionManager.trying(event, compensationInfo, () -> {
             action.run();
             return null;
         });
@@ -172,7 +141,7 @@ public class TccTransactionManager {
 
     public <T> T branchTry(String event, String compensationInfo, Supplier<T> action) {
         LOGGER.debug("TccMgr begin try branch.");
-        return trying(event, compensationInfo, action);
+        return tccTransactionManager.trying(event, compensationInfo, action);
     }
 
     /**
@@ -206,8 +175,9 @@ public class TccTransactionManager {
         LOGGER.debug("TccMgr saving context, TccTxId: {}", tccTransaction.getTccTxId());
         tccTransactionMapper.save(tccTransaction);
         TCC_HOLDER.set(tccTransaction);
+        T result = tryLocalAction.get();
         LOGGER.info("Trying with TccTxId: {}", tccTransaction.getTccTxId());
-        return tryLocalAction.get();
+        return result;
     }
 
     /**
@@ -228,13 +198,16 @@ public class TccTransactionManager {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void confirming() {
-        TccTransaction tccTransaction = TCC_HOLDER.get();
-        if (tccTransaction == null) {
-            tccTransaction = tccTransactionMapper.getByTccTxId(extractTccTxId().get()).orElseThrow(
-                    () -> new IllegalStateException("No tccTransaction while do confirming."));
+        Optional<TccTransaction> tccTransactionOpt = findTccTransaction();
+        if (!tccTransactionOpt.isPresent()) {
+            LOGGER.info("Tcc already confirmed, tccTxId:{}", extractTccTxId().orElse("unKnown"));
+            return;
         }
-        tccTransaction.setPhase(TccTransaction.Phase.CONFIRMING);
-        tccTransactionMapper.update(tccTransaction);
+        TccTransaction tccTransaction = tccTransactionOpt.get();
+        if (!tccTransaction.getPhase().equals(CONFIRMING)) {
+            tccTransaction.setPhase(CONFIRMING);
+            tccTransactionMapper.update(tccTransaction);
+        }
     }
 
     /**
@@ -245,6 +218,7 @@ public class TccTransactionManager {
     @Transactional
     public void cancel(Runnable cancelAction) {
         if (needCancel()) {
+            LOGGER.debug("Need cancel tccTxId: {}", extractTccTxId().orElse(null));
             tccTransactionManager.canceling();
             LOGGER.debug("Tcc status: canceling, tccTxId: {}", extractTccTxId().orElse(null));
             cancelAction.run();
@@ -257,13 +231,20 @@ public class TccTransactionManager {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void canceling() {
-        TccTransaction tccTransaction = TCC_HOLDER.get();
-        if (tccTransaction == null) {
-            tccTransaction = tccTransactionMapper.getByTccTxId(extractTccTxId().get()).orElseThrow(
-                    () -> new IllegalStateException("No tccTransaction while do confirming."));
-        }
+        TccTransaction tccTransaction = findTccTransaction().orElseThrow(() ->
+                new IllegalStateException("No tccTransaction while do confirming."));
         tccTransaction.setPhase(TccTransaction.Phase.CANCELING);
         tccTransactionMapper.update(tccTransaction);
+    }
+
+    /**
+     * confirm或cancel成功后删除事务表的记录
+     */
+    public void done() {
+        String tccTxId = extractTccTxId().orElseThrow(() ->
+                new IllegalStateException("No tccTransaction while tx done."));
+        tccTransactionMapper.delete(tccTxId);
+        TCC_HOLDER.remove();
     }
 
     /**
@@ -274,12 +255,28 @@ public class TccTransactionManager {
     private boolean needCancel() {
         String tccTxId = extractTccTxId().orElseThrow(() -> new IllegalStateException("Cancel tx but have no tccTxId"));
         Optional<TccTransaction> txxTxOpt = tccTransactionMapper.getByTccTxId(tccTxId);
-        return (txxTxOpt.isPresent())
-                && !TccTransaction.Phase.CONFIRMING.equals(txxTxOpt.map(TccTransaction::getPhase).orElse(null));
+        return (txxTxOpt.isPresent()) && !CONFIRMING.equals(txxTxOpt.map(TccTransaction::getPhase).orElse(null));
     }
 
     /**
-     * 从上下午获取TccTransaction，或者是分支事务从header获取TccContext
+     * 从上下文或者数据库中查找当前TccTx
+     *
+     * @return Optional<TccTransaction>
+     */
+    private Optional<TccTransaction> findTccTransaction() {
+        Optional<TccTransaction> tccTransaction = Optional.ofNullable(TCC_HOLDER.get());
+        if (!tccTransaction.isPresent()) {
+            Optional<String> tccTxId = extractTccTxId();
+            if (tccTxId.isPresent()) {
+                tccTransaction = tccTransactionMapper.getByTccTxId(tccTxId.get());
+            }
+        }
+        return tccTransaction;
+    }
+
+
+    /**
+     * 从上下文获取TccTransaction，或者是分支事务从header获取TccContext
      *
      * @return tccTxId
      */
@@ -291,16 +288,6 @@ public class TccTransactionManager {
         } else {
             return Optional.ofNullable(tccTransaction.getTccTxId());
         }
-    }
-
-    /**
-     * confirm或cancel成功后删除事务表的记录
-     */
-    public void done() {
-        String tccTxId = extractTccTxId().orElseThrow(() ->
-                new IllegalStateException("No tccTransaction while tx done."));
-        tccTransactionMapper.delete(tccTxId);
-        TCC_HOLDER.remove();
     }
 
 }

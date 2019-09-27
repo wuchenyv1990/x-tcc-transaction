@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.wcyv90.x.tcc.sponsor.infra.Constant.PAY_EVENT;
+import static com.wcyv90.x.tcc.sponsor.service.RecoveryPayHandler.PAY_EVENT;
 
 @Service
 @Slf4j

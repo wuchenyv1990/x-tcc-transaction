@@ -7,7 +7,7 @@
         <result column="UPDATE_TIME" property="updateTime"/>
     </resultMap>
 
-    <select id="getById" resultMap="account">
+    <select id="getByIdForUpdate" resultMap="account">
         SELECT
             `ID`,
             `TOTAL_AMOUNT`,
@@ -16,6 +16,7 @@
             `X_ACCOUNT`
         WHERE
             `ID`=#{id}
+        FOR UPDATE
     </select>
 
     <update id="update">

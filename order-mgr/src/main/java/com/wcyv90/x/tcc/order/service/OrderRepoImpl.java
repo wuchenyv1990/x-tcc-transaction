@@ -18,7 +18,7 @@ public class OrderRepoImpl implements OrderRepo {
 
     @Override
     public Optional<Order> getById(Long id) {
-        return orderMapper.getById(id);
+        return orderMapper.getByIdForUpdate(id);
     }
 
     @Override

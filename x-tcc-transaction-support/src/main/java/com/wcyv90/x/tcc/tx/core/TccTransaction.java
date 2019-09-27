@@ -113,4 +113,17 @@ public class TccTransaction {
         retryTimes++;
     }
 
+    @Override
+    public String toString() {
+        return "TccTransaction{" +
+                "id=" + id +
+                ", tccTxId='" + tccTxId + '\'' +
+                ", phase=" + phase +
+                ", type=" + type +
+                ", compensationEvent='" + compensationEvent + '\'' +
+                ", createTime=" + createTime +
+                ", updateTime=" + updateTime +
+                ", retryTimes=" + retryTimes +
+                '}';
+    }
 }

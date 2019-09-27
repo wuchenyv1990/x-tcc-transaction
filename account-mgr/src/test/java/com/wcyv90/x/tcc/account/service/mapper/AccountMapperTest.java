@@ -27,7 +27,7 @@ public class AccountMapperTest {
     @Test
     @Transactional(readOnly = true)
     public void shouldGetByIdSuccess() {
-        Optional<Account> resultOpt = accountMapper.getById(1L);
+        Optional<Account> resultOpt = accountMapper.getByIdForUpdate(1L);
         assertNotNull(resultOpt);
         assertNotNull(resultOpt.get());
     }
@@ -38,7 +38,7 @@ public class AccountMapperTest {
         BigDecimal totalAmount = AmountDecimal.defaultPrecision("450");
         Account updatedOrder = Account.builder().id(1L).totalAmount(totalAmount).build();
         accountMapper.update(updatedOrder);
-        assertEquals(totalAmount, accountMapper.getById(1L).get().getTotalAmount());
+        assertEquals(totalAmount, accountMapper.getByIdForUpdate(1L).get().getTotalAmount());
     }
 
 }

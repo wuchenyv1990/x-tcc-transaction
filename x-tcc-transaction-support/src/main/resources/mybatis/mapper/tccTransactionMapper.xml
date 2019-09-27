@@ -50,5 +50,14 @@
             TCC_TX_ID = #{tccTxId}
     </delete>
 
+    <select id="getRootTccTransactions" resultMap="tccTx">
+        SELECT
+            `ID`, `TCC_TX_ID`, `PHASE`, `TYPE`, `COMPENSATION_EVENT`,
+            `COMPENSATION_INFO`, `CREATE_TIME`, `UPDATE_TIME`, `RETRY_TIMES`
+        FROM
+            `X_TCC_TRANSACTION`
+        WHERE
+            `TYPE` = "ROOT"
+    </select>
 
 </mapper>

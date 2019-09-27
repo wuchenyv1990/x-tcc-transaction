@@ -12,22 +12,22 @@ import java.io.IOException;
 
 public class TccEnvFilter implements Filter {
 
-    public static final int TCC_FILTER_ORDER = Ordered.HIGHEST_PRECEDENCE + 100;
+    static final int TCC_FILTER_ORDER = Ordered.HIGHEST_PRECEDENCE + 100;
 
     public static final String TCC_HEADER = "X-tcc-context";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccEnvFilter.class);
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         TccContext tccContext = JsonMapper.load(httpServletRequest.getHeader(TCC_HEADER), TccContext.class);
         if (tccContext != null) {
             LOGGER.debug("TccContext found: {tccTxId: {}, phase: {}}", tccContext.getTccTxId(), tccContext.getPhase());
             TccTransactionManager.setContext(tccContext);
         }
-        filterChain.doFilter(servletRequest, servletResponse);
+        chain.doFilter(request, response);
         TccTransactionManager.clearContext();
     }
 

@@ -18,7 +18,7 @@ public class AccountRepoImpl implements AccountRepo {
 
     @Override
     public Optional<Account> getById(Long id) {
-        return accountMapper.getById(id);
+        return accountMapper.getByIdForUpdate(id);
     }
 
     @Override

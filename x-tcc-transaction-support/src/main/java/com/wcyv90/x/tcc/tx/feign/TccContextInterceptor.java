@@ -2,7 +2,6 @@ package com.wcyv90.x.tcc.tx.feign;
 
 import com.wcyv90.x.tcc.common.JsonMapper;
 import com.wcyv90.x.tcc.tx.core.TccContext;
-import com.wcyv90.x.tcc.tx.core.TccEnvFilter;
 import com.wcyv90.x.tcc.tx.core.TccTransaction;
 import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import feign.RequestInterceptor;

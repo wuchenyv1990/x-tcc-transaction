@@ -9,7 +9,7 @@ import java.util.Optional;
 @Mapper
 public interface OrderMapper {
 
-    Optional<Order> getById(Long id);
+    Optional<Order> getByIdForUpdate(Long id);
 
     int update(@Param("order") Order order);
 

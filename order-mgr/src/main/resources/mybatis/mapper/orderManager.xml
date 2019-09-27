@@ -7,7 +7,7 @@
         <result column="PAID_AMOUNT" property="paidAmount"/>
     </resultMap>
 
-    <select id="getById" resultMap="order">
+    <select id="getByIdForUpdate" resultMap="order">
         SELECT
             `ID`,
             `PRICE_AMOUNT`,
@@ -16,6 +16,7 @@
             `X_ORDER`
         WHERE
             `ID`=#{id}
+        FOR UPDATE
     </select>
 
     <update id="update">

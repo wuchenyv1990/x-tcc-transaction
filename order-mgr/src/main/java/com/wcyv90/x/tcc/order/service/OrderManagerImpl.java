@@ -34,11 +34,14 @@ public class OrderManagerImpl implements OrderManager {
                     payOrderInfo.getAmount()
             );
             probablyThrow();
+
             Order order = orderRepo.getById(payOrderInfo.getOrderId()).orElseThrow(AppException::new);
             BigDecimal addedAmount = order.getPaidAmount().add(payOrderInfo.getAmount());
             if (addedAmount.compareTo(order.getPriceAmount()) > 0) {
                 throw new AppException();
             }
+            log.info("set order {} -> {}", order.getPaidAmount(), addedAmount);
+
             order.setPaidAmount(addedAmount);
             orderRepo.update(order);
             log.info("Try success.");
@@ -66,7 +69,10 @@ public class OrderManagerImpl implements OrderManager {
             );
             probablyThrow();
             Order order = orderRepo.getById(payOrderInfo.getOrderId()).orElseThrow(AppException::new);
-            order.setPaidAmount(order.getPaidAmount().subtract(payOrderInfo.getAmount()));
+            BigDecimal subtractedAmount = order.getPaidAmount().subtract(payOrderInfo.getAmount());
+            log.info("cancel order {} -> {}", order.getPaidAmount(), subtractedAmount);
+
+            order.setPaidAmount(subtractedAmount);
             orderRepo.update(order);
             log.info("Cancel success.");
         });

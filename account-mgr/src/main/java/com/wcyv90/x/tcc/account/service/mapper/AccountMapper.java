@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface AccountMapper {
 
-    Optional<Account> getById(Long id);
+    Optional<Account> getByIdForUpdate(Long id);
 
     void update(@Param("account") Account account);
 
