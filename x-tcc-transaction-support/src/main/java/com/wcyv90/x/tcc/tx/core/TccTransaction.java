@@ -31,18 +31,18 @@ public class TccTransaction {
     /**
      * 事务阶段
      */
-    public static enum Phase {
+    public enum Phase {
         TRYING,
         CONFIRMING,
-        CANCELING;
+        CANCELING
     }
 
     /**
      * 自动恢复从主事务触发
      */
-    public static enum Type {
+    public enum Type {
         ROOT,
-        BRANCH;
+        BRANCH
     }
 
     public String getTccTxId() {

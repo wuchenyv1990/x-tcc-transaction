@@ -106,7 +106,7 @@ public class RecoveryJob {
         }
     }
 
-    private class DoNothingRecoveryHandler implements RecoveryHandler {
+    private static class DoNothingRecoveryHandler implements RecoveryHandler {
 
         @Override
         public String getCompensationEvent() {

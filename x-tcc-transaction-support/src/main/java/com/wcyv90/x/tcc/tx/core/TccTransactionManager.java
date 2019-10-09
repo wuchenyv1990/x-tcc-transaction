@@ -187,27 +187,31 @@ public class TccTransactionManager {
      */
     @Transactional
     public void confirm(Runnable confirmAction) {
-        tccTransactionManager.confirming();
-        LOGGER.debug("Tcc status: confirming, tccTxId: {}", extractTccTxId().orElse(null));
-        confirmAction.run();
-        tccTransactionManager.done();
+        if (tccTransactionManager.confirming()) {
+            LOGGER.debug("Tcc status: confirming, tccTxId: {}", extractTccTxId().orElse(null));
+            confirmAction.run();
+            tccTransactionManager.done();
+        }
     }
 
     /**
-     * 进入confirming状态，表明本地和远程分支事务均try成功
+     * 进入confirming状态，表明本地和远程分支事务均try成功，如果没有找到上下文，则不需要执行confirm action
+     *
+     * @return 是否 尚未执行confirm action
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void confirming() {
+    public boolean confirming() {
         Optional<TccTransaction> tccTransactionOpt = findTccTransaction();
         if (!tccTransactionOpt.isPresent()) {
             LOGGER.info("Tcc already confirmed, tccTxId:{}", extractTccTxId().orElse("unKnown"));
-            return;
+            return false;
         }
         TccTransaction tccTransaction = tccTransactionOpt.get();
         if (!tccTransaction.getPhase().equals(CONFIRMING)) {
             tccTransaction.setPhase(CONFIRMING);
             tccTransactionMapper.update(tccTransaction);
         }
+        return true;
     }
 
     /**

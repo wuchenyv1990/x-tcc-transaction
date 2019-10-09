@@ -18,7 +18,7 @@ import static com.wcyv90.x.tcc.tx.core.TccEnvFilter.TCC_FILTER_ORDER;
 public class TccConfig {
 
     @Bean
-    public FilterRegistrationBean svcTraceFilter() {
+    public FilterRegistrationBean tccContextFilter() {
         FilterRegistrationBean<TccEnvFilter> filterRegistrationBean = new FilterRegistrationBean<>(
                 tccEnvFilter());
         filterRegistrationBean.setDispatcherTypes(DispatcherType.ASYNC,
