@@ -13,7 +13,7 @@
         <result column="RETRY_TIMES" property="retryTimes"/>
     </resultMap>
 
-    <select id="getByTccTxId" resultMap="tccTx">
+    <select id="getByTccTxIdForUpdate" resultMap="tccTx">
         SELECT
             `ID`, `TCC_TX_ID`, `PHASE`, `TYPE`, `COMPENSATION_EVENT`,
             `COMPENSATION_INFO`, `CREATE_TIME`, `UPDATE_TIME`, `RETRY_TIMES`
@@ -21,6 +21,7 @@
             `X_TCC_TRANSACTION`
         WHERE
             `TCC_TX_ID` = #{tccTxId}
+        FOR UPDATE
     </select>
 
     <insert id="save">

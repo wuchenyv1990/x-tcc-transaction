@@ -1,6 +1,5 @@
 package com.wcyv90.x.tcc.sponsor.service;
 
-import com.wcyv90.x.tcc.common.JsonMapper;
 import com.wcyv90.x.tcc.sponsor.domain.dto.PayAccountInfoDTO;
 import com.wcyv90.x.tcc.sponsor.domain.dto.PayOrderInfoDTO;
 import com.wcyv90.x.tcc.sponsor.domain.model.PayInfo;
@@ -38,23 +37,37 @@ public class PayServiceImpl implements PayService {
      */
     @Override
     public void pay(PayInfo payInfo) {
-
         //可能提前准备一些各服务间所需的交互数据，then:
-
-        tccTransactionManager.withRootTcc(PAY_EVENT, JsonMapper.dumps(payInfo),
-                () -> {
-                    log.info("Root tcc local action.");
-                    payManager.tryPay(payInfo);
-                },
-                () -> {
-                    log.info("Root tcc remote call.");
-                    orderService.tryPay(PayOrderInfoDTO.from(payInfo));
-                    accountService.tryPay(PayAccountInfoDTO.from(payInfo));
-                    log.info("Root tcc remote call success.");
-                },
-                () -> confirmPay(payInfo),
-                () -> cancelPay(payInfo)
+        tccTransactionManager.withRootTcc(
+                PAY_EVENT,
+                payInfo,
+                this::tryPayLocal,
+                this::tryPayRemote,
+                this::confirmPay,
+                this::cancelPay
         );
+    }
+
+    /**
+     * 本地pay，此处没有实际操作
+     *
+     * @param payInfo payInfo
+     */
+    public void tryPayLocal(PayInfo payInfo) {
+        log.info("Root tcc local action.");
+        payManager.tryPay(payInfo);
+    }
+
+    /**
+     * 调用远程pay
+     *
+     * @param payInfo payInfo
+     */
+    public void tryPayRemote(PayInfo payInfo) {
+        log.info("Root tcc remote call.");
+        orderService.tryPay(PayOrderInfoDTO.from(payInfo));
+        accountService.tryPay(PayAccountInfoDTO.from(payInfo));
+        log.info("Root tcc remote call success.");
     }
 
     /**

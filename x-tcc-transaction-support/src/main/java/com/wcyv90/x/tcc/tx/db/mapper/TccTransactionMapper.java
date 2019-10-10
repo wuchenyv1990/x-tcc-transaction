@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface TccTransactionMapper {
 
-    Optional<TccTransaction> getByTccTxId(String tccTxId);
+    Optional<TccTransaction> getByTccTxIdForUpdate(String tccTxId);
 
     void save(@Param("tccTx") TccTransaction tccTransaction);
 
