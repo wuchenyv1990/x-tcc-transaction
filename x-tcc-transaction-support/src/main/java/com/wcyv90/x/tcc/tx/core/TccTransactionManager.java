@@ -211,10 +211,16 @@ public class TccTransactionManager {
      * <li>1.更改为confirming状态(new tx)</li>
      * <li>2.执行confirm操作</li>
      * <li>3.删事务表</li>
+     * <li>4.流程成功后，confirm不再执行action(保证幂等)</li>
      */
     @Transactional
     public void confirm(Runnable confirmAction) {
         if (tccTransactionManager.confirmingIfNeeded()) {
+            //并发时可能再次进入，因此做检查，死锁退出不影响业务
+            //如果tcc接口保证幂等，可以不做
+            if (!findTccTransactionForUpdate().isPresent()) {
+                return ;
+            }
             LOGGER.debug("Tcc status: confirming, tccTxId: {}", extractTccTxId().orElse(null));
             confirmAction.run();
             done();
@@ -245,13 +251,13 @@ public class TccTransactionManager {
      * <li>1.更改为canceling状态(new tx)</li>
      * <li>2.执行cancel操作</li>
      * <li>3.删事务表</li>
+     * <li>4.流程成功后，cancel不再执行action(保证幂等)</li>
      */
     @Transactional
     public void cancel(Runnable cancelAction) {
         if (tccTransactionManager.cancelingIfNeeded()) {
-            //并发时，同时进入，需要再次判断，死锁退出不影响业务
-            Optional<TccTransaction> tccTransactionOpt = findTccTransactionForUpdate();
-            if (!needCancel(tccTransactionOpt)) {
+            //同confirm
+            if (!needCancel(findTccTransactionForUpdate())) {
                 return ;
             }
             LOGGER.debug("Need cancel tccTxId: {}, status: canceling", extractTccTxId().orElse(null));
