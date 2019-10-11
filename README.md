@@ -8,6 +8,9 @@
 <li>confirm: ROOT需要所有remote confirm成功；BRANCH通过查找tccTxId实现幂等</li>
 <li>cancel: 基本同confirm，且只有tccTxId存在且<b>状态不为confirming</b>才需要执行cancel</li>
 <li>定时任务：对try和cancel状态的`X_TCC_TRANSACTION`进行cancel操作</li>
-<li>定时任务：对cofirm状态的`X_TCC_TRANSACTION`进行confirm操作</li>
+<li>定时任务：对confirm状态的`X_TCC_TRANSACTION`进行confirm操作</li>
+<li>若接口不幂等，TCCTransactionManager可以锁tcc事务记录实现单次补偿</li>
+<li>进程存在多个replica时，可开启延迟recoveryJob，错开执行</li>
 <li>此demo: order、account表不单独记录状态，因此confirm直接删除当前`X_TCC_TRANSACTION`</li>
+<li>try存在数据删除时，可以的一种方式：try软删除，confirm删除，cancel恢复；有更新操作可select for update+判断状态合法性</li>
 注：lombok 需开启 annotation processor

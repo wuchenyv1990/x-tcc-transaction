@@ -1,7 +1,7 @@
 package com.wcyv90.x.tcc.order.controller;
 
 import com.wcyv90.x.tcc.order.domain.dto.PayOrderInfoDTO;
-import com.wcyv90.x.tcc.order.domain.service.OrderManager;
+import com.wcyv90.x.tcc.order.domain.service.OrderService;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,24 +11,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OrderController {
 
-    private final OrderManager orderManager;
+    private final OrderService orderService;
 
-    public OrderController(OrderManager orderManager) {
-        this.orderManager = orderManager;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     @PutMapping("/pay/try")
     public void pay(@RequestBody PayOrderInfoDTO payOrderInfoDTO) {
-        orderManager.tryPayOrder(payOrderInfoDTO.to());
+        orderService.tryPayOrder(payOrderInfoDTO.to());
     }
 
     @PutMapping("/pay/confirm")
     public void confirmPay(@RequestBody PayOrderInfoDTO payOrderInfoDTO) {
-        orderManager.confirmPayOrder(payOrderInfoDTO.to());
+        orderService.confirmPayOrder(payOrderInfoDTO.to());
     }
 
     @PutMapping("/pay/cancel")
     public void cancelPay(@RequestBody PayOrderInfoDTO payOrderInfoDTO) {
-        orderManager.cancelPayOrder(payOrderInfoDTO.to());
+        orderService.cancelPayOrder(payOrderInfoDTO.to());
     }
 }

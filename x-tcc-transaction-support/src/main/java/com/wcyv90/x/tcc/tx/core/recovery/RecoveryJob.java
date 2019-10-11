@@ -4,6 +4,7 @@ import com.wcyv90.x.tcc.tx.core.TccProperty;
 import com.wcyv90.x.tcc.tx.core.TccTransaction;
 import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import com.wcyv90.x.tcc.tx.db.TccTransactionRepo;
+import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.wcyv90.x.tcc.tx.core.TccTransaction.Phase.CONFIRMING;
@@ -45,14 +47,14 @@ public class RecoveryJob {
     /**
      * 补偿tcc事务表创建时间大于时间间隔的事务
      */
-    private long interval = 20L;
+    private int interval = 20;
 
     private Map<String, RecoveryHandler> recoveryHandlerMap = Collections.emptyMap();
 
     @PostConstruct
     private void decideInterval() {
-        if (Long.parseLong(tccProperty.getRecoveryInterval()) > 20L) {
-            interval = Long.parseLong(tccProperty.getRecoveryInterval());
+        if (tccProperty.getRecoveryInterval() > 20) {
+            interval = tccProperty.getRecoveryInterval();
         }
     }
 
@@ -70,6 +72,9 @@ public class RecoveryJob {
     }
 
     private void compensate() {
+        if (tccProperty.isEnableRandomDelay()) {
+            sleep();
+        }
         LOGGER.debug("RecoveryJob start");
         tccTransactionRepo.getUncompensatedTxs()
                 .stream()
@@ -77,6 +82,15 @@ public class RecoveryJob {
                         .minus(interval, ChronoUnit.SECONDS)
                         .compareTo(tccTransaction.getUpdateTime()) > 0
                 ).forEach(this::doCompensate);
+    }
+
+    private void sleep() {
+        try {
+            TimeUnit.SECONDS.sleep(RandomUtils.nextInt(
+                    tccProperty.getRandomDelayRange())
+            );
+        } catch (InterruptedException ignore) {
+        }
     }
 
     private void doCompensate(TccTransaction tccTransaction) {

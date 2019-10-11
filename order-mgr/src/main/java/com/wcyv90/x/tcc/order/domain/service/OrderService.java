@@ -2,7 +2,7 @@ package com.wcyv90.x.tcc.order.domain.service;
 
 import com.wcyv90.x.tcc.order.domain.model.PayOrderInfo;
 
-public interface OrderManager {
+public interface OrderService {
 
     void tryPayOrder(PayOrderInfo payOrderInfo);
 

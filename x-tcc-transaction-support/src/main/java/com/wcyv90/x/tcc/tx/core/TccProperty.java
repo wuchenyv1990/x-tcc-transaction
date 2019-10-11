@@ -13,7 +13,11 @@ public class TccProperty {
     /**
      * 距离上次更新时间超过xx秒的任务才触发补偿
      */
-    private String recoveryInterval = "20";
+    private int recoveryInterval = 20;
+
+    private boolean enableRandomDelay = false;
+
+    private int randomDelayRange = 20;
 
     public String getCorn() {
         return corn;
@@ -23,12 +27,28 @@ public class TccProperty {
         this.corn = corn;
     }
 
-    public String getRecoveryInterval() {
+    public int getRecoveryInterval() {
         return recoveryInterval;
     }
 
-    public void setRecoveryInterval(String recoveryInterval) {
+    public void setRecoveryInterval(int recoveryInterval) {
         this.recoveryInterval = recoveryInterval;
+    }
+
+    public boolean isEnableRandomDelay() {
+        return enableRandomDelay;
+    }
+
+    public void setEnableRandomDelay(boolean enableRandomDelay) {
+        this.enableRandomDelay = enableRandomDelay;
+    }
+
+    public int getRandomDelayRange() {
+        return randomDelayRange;
+    }
+
+    public void setRandomDelayRange(int randomDelayRange) {
+        this.randomDelayRange = randomDelayRange;
     }
 
 }
