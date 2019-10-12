@@ -81,7 +81,8 @@ public class RecoveryJob {
                 .filter(tccTransaction -> LocalDateTime.now()
                         .minus(interval, ChronoUnit.SECONDS)
                         .compareTo(tccTransaction.getUpdateTime()) > 0
-                ).forEach(this::doCompensate);
+                ).map(TccTransaction::getTccTxId)
+                .forEach(this::doCompensate);
     }
 
     private void sleep() {
@@ -93,14 +94,14 @@ public class RecoveryJob {
         }
     }
 
-    private void doCompensate(TccTransaction tccTransaction) {
-        LOGGER.info("Compensate event: {}, phase: {}",
-                tccTransaction.getCompensationEvent(),
-                tccTransaction.getPhase());
-        TccTransactionManager.setContext(tccTransaction);
+    private void doCompensate(String tccTxId) {
         try {
-            tccTransaction.retried();
-            tccTransactionRepo.updateTccTransaction(tccTransaction);
+            TccTransaction tccTransaction = tccTransactionRepo.queryAndCompensate(tccTxId);
+            LOGGER.debug("Compensate event: {}, phase: {}",
+                    tccTransaction.getCompensationEvent(),
+                    tccTransaction.getPhase()
+            );
+            TccTransactionManager.setContext(tccTransaction);
             if (tccTransaction.getPhase().equals(CONFIRMING)) {
                 tccTransactionManager.confirm(() -> recoveryHandlerMap.getOrDefault(
                         tccTransaction.getCompensationEvent(),

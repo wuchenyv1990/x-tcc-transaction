@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static java.text.MessageFormat.format;
+
 @Repository
 public class TccTransactionRepo {
 
@@ -20,8 +22,12 @@ public class TccTransactionRepo {
     }
 
     @Transactional
-    public void updateTccTransaction(TccTransaction tccTransaction) {
+    public TccTransaction queryAndCompensate(String tccTxId) {
+        TccTransaction tccTransaction = tccTransactionMapper.getByTccTxIdForUpdate(tccTxId).orElseThrow(() ->
+                new IllegalStateException(format("Compensate tcc not found : {}", tccTxId))
+        );
+        tccTransaction.retried();
         tccTransactionMapper.update(tccTransaction);
+        return tccTransaction;
     }
-
 }
