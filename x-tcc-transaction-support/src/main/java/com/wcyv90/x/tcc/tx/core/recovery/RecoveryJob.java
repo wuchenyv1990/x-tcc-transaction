@@ -81,7 +81,9 @@ public class RecoveryJob {
                 .filter(tccTransaction -> LocalDateTime.now()
                         .minus(interval, ChronoUnit.SECONDS)
                         .compareTo(tccTransaction.getUpdateTime()) > 0
-                ).map(TccTransaction::getTccTxId)
+                )
+                .filter(this::hasRecoveryHandler)
+                .map(TccTransaction::getTccTxId)
                 .forEach(this::doCompensate);
     }
 
@@ -103,16 +105,13 @@ public class RecoveryJob {
             );
             TccTransactionManager.setContext(tccTransaction);
             if (tccTransaction.getPhase().equals(CONFIRMING)) {
-                tccTransactionManager.confirm(() -> recoveryHandlerMap.getOrDefault(
-                        tccTransaction.getCompensationEvent(),
-                        new DoNothingRecoveryHandler()
-                        ).confirm(tccTransaction.getCompensationInfo())
-                );
+                tccTransactionManager.confirm(() ->
+                        recoveryHandlerMap.get(tccTransaction.getCompensationEvent())
+                        .confirm(tccTransaction.getCompensationInfo()));
             } else {
-                tccTransactionManager.cancel(() -> recoveryHandlerMap.getOrDefault(
-                        tccTransaction.getCompensationEvent(),
-                        new DoNothingRecoveryHandler()
-                ).cancel(tccTransaction.getCompensationInfo()));
+                tccTransactionManager.cancel(() ->
+                        recoveryHandlerMap.get(tccTransaction.getCompensationEvent())
+                        .cancel(tccTransaction.getCompensationInfo()));
             }
         } catch (Exception e) {
             LOGGER.error("Error occurred when doing compensation: {}.", e.getMessage());
@@ -121,23 +120,8 @@ public class RecoveryJob {
         }
     }
 
-    private static class DoNothingRecoveryHandler implements RecoveryHandler {
-
-        @Override
-        public String getCompensationEvent() {
-            return "";
-        }
-
-        @Override
-        public void confirm(String compensationInfo) {
-            LOGGER.info("RecoveryHandler not found");
-        }
-
-        @Override
-        public void cancel(String compensationInfo) {
-            LOGGER.info("RecoveryHandler not found");
-        }
-
+    private boolean hasRecoveryHandler(TccTransaction tccTransaction) {
+        return recoveryHandlerMap.containsKey(tccTransaction);
     }
 
 }
