@@ -24,7 +24,8 @@ public class TccEnvFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         TccContext tccContext = JsonMapper.load(httpServletRequest.getHeader(TCC_HEADER), TccContext.class);
         if (tccContext != null) {
-            LOGGER.debug("TccContext found: {tccTxId: {}, phase: {}}", tccContext.getTccTxId(), tccContext.getPhase());
+            LOGGER.debug("TccContext found: {tccTxId: {}, phase: {}, event:{}}",
+                    tccContext.getTccTxId(), tccContext.getPhase(), tccContext.getEvent());
             TccTransactionManager.setContext(tccContext);
         }
         chain.doFilter(request, response);

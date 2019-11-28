@@ -5,7 +5,6 @@ import com.wcyv90.x.tcc.account.domain.model.PayAccountInfo;
 import com.wcyv90.x.tcc.account.domain.service.AccountManager;
 import com.wcyv90.x.tcc.account.domain.service.AccountRepo;
 import com.wcyv90.x.tcc.common.exception.AppException;
-import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,9 +20,6 @@ public class AccountManagerImpl implements AccountManager {
 
     @Autowired
     private AccountRepo accountRepo;
-
-    @Autowired
-    TccTransactionManager tccTransactionManager;
 
     @Transactional
     @Override

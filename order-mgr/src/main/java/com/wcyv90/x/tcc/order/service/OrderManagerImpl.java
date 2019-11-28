@@ -5,7 +5,6 @@ import com.wcyv90.x.tcc.order.domain.model.Order;
 import com.wcyv90.x.tcc.order.domain.model.PayOrderInfo;
 import com.wcyv90.x.tcc.order.domain.service.OrderManager;
 import com.wcyv90.x.tcc.order.domain.service.OrderRepo;
-import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,9 +19,6 @@ public class OrderManagerImpl implements OrderManager {
 
     @Autowired
     private OrderRepo orderRepo;
-
-    @Autowired
-    private TccTransactionManager tccTransactionManager;
 
     @Override
     public void tryPayOrder(PayOrderInfo payOrderInfo) {

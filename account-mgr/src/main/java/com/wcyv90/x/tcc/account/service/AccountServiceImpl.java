@@ -7,8 +7,6 @@ import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.wcyv90.x.tcc.account.infra.Constant.PAY_ACCOUNT_EVENT;
-
 @Service
 public class AccountServiceImpl implements AccountService {
 
@@ -21,7 +19,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void tryPay(PayAccountInfo payAccountInfo) {
         tccTransactionManager.branchTry(
-                PAY_ACCOUNT_EVENT,
                 payAccountInfo,
                 accountManager::tryPay
         );

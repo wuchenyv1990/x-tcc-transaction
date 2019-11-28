@@ -154,34 +154,32 @@ public class TccTransactionManager {
     /**
      * 分支事务try
      *
-     * @param event  事务动作名，补偿线程触发补偿
      * @param data   补偿所需数据，默认转json
      * @param action consumer消费data
      * @param <T>    data类型
      */
-    public <T> void branchTry(String event, T data, Consumer<T> action) {
+    public <T> void branchTry(T data, Consumer<T> action) {
         LOGGER.debug("TccMgr begin try branch.");
-        branchTry(event, JsonMapper.dumps(data), () -> action.accept(data));
+        branchTry(JsonMapper.dumps(data), () -> action.accept(data));
     }
 
     /**
      * 分支事务try
      *
-     * @param event            事务动作名，补偿线程触发补偿
      * @param compensationInfo 补偿所需数据，比如入参的json
      * @param action           补偿调用动作
      */
-    public void branchTry(String event, String compensationInfo, Runnable action) {
+    public void branchTry(String compensationInfo, Runnable action) {
         LOGGER.debug("TccMgr begin try branch.");
-        tccTransactionManager.trying(event, compensationInfo, () -> {
+        tccTransactionManager.trying(TCC_CONTEXT_HOLDER.get().getEvent(), compensationInfo, () -> {
             action.run();
             return null;
         });
     }
 
-    public <T> T branchTry(String event, String compensationInfo, Supplier<T> action) {
+    public <T> T branchTry(String compensationInfo, Supplier<T> action) {
         LOGGER.debug("TccMgr begin try branch.");
-        return tccTransactionManager.trying(event, compensationInfo, action);
+        return tccTransactionManager.trying(TCC_CONTEXT_HOLDER.get().getEvent(), compensationInfo, action);
     }
 
     /**
@@ -203,7 +201,7 @@ public class TccTransactionManager {
             tccTransaction.setTccTxId(tccContext.getTccTxId());
             tccTransaction.setPhase(tccContext.getPhase());
             tccTransaction.setType(TccTransaction.Type.BRANCH);
-            tccTransaction.setCompensationEvent(event);
+            tccTransaction.setCompensationEvent(tccContext.getEvent());
             tccTransaction.setCompensationInfo(info);
         } else {
             tccTransaction.setTccTxId(UUID.randomUUID().toString());

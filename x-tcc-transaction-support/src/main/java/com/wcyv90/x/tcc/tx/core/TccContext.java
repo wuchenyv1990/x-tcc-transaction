@@ -6,6 +6,8 @@ public class TccContext {
 
     private TccTransaction.Phase phase;
 
+    private String event;
+
     public String getTccTxId() {
         return tccTxId;
     }
@@ -20,5 +22,13 @@ public class TccContext {
 
     public void setPhase(TccTransaction.Phase phase) {
         this.phase = phase;
+    }
+
+    public String getEvent() {
+        return event;
+    }
+
+    public void setEvent(String event) {
+        this.event = event;
     }
 }

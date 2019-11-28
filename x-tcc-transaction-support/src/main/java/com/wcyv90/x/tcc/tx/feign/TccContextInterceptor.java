@@ -18,6 +18,7 @@ public class TccContextInterceptor implements RequestInterceptor {
             TccContext tccContext = new TccContext();
             tccContext.setTccTxId(tccTx.getTccTxId());
             tccContext.setPhase(tccTx.getPhase());
+            tccContext.setEvent(tccTx.getCompensationEvent());
             requestTemplate.header(TCC_HEADER, JsonMapper.dumps(tccContext));
         }
     }
