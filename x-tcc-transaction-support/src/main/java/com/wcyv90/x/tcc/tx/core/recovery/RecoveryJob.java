@@ -4,6 +4,7 @@ import com.wcyv90.x.tcc.tx.core.TccProperty;
 import com.wcyv90.x.tcc.tx.core.TccTransaction;
 import com.wcyv90.x.tcc.tx.core.TccTransactionManager;
 import com.wcyv90.x.tcc.tx.db.TccTransactionRepo;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,9 @@ public class RecoveryJob {
     @Autowired
     private TccTransactionManager tccTransactionManager;
 
+    @Autowired
+    private RecoveryJob recoveryJob;
+
     /**
      * 补偿tcc事务表创建时间大于时间间隔的事务
      */
@@ -52,7 +56,7 @@ public class RecoveryJob {
     private Map<String, RecoveryHandler> recoveryHandlerMap = Collections.emptyMap();
 
     @PostConstruct
-    private void decideInterval() {
+    private void decideIntervalAndLockName() {
         if (tccProperty.getRecoveryInterval() > 20) {
             interval = tccProperty.getRecoveryInterval();
         }
@@ -68,10 +72,11 @@ public class RecoveryJob {
 
     @EventListener(ApplicationReadyEvent.class)
     public void startJob(ApplicationReadyEvent readyEvent) {
-        recoveryTccScheduler.schedule(this::compensate, new CronTrigger(tccProperty.getCorn()));
+        recoveryTccScheduler.schedule(recoveryJob::compensate, new CronTrigger(tccProperty.getCorn()));
     }
 
-    private void compensate() {
+    @SchedulerLock(name = "tccRecoveryLock", lockAtMostFor = "1m", lockAtLeastFor = "20s")
+    public void compensate() {
         if (tccProperty.isEnableRandomDelay()) {
             sleep();
         }

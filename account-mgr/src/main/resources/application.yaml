@@ -10,7 +10,7 @@ spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
     url: >
-        jdbc:mysql://127.0.0.1:3306/X_ACCOUNT_MGR
+        jdbc:mysql://127.0.0.1:3306/x_account_mgr
         ?useUnicode=true
         &serverTimezone=UTC
         &characterEncoding=utf-8

@@ -9,13 +9,16 @@ spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
     url: >
-        jdbc:mysql://127.0.0.1:3306/X_SPONSOR
+        jdbc:mysql://127.0.0.1:3306/x_sponsor
         ?useUnicode=true
         &serverTimezone=Asia/Shanghai
         &characterEncoding=utf-8
         &allowMutiQueries=true
     username: root
     password: root
+  redis:
+    host: localhost
+    port: 6379
 
 logging:
   level:

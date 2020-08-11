@@ -2,33 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.wcyv90.x.tcc.tx.db.mapper.TccTransactionMapper">
     <resultMap type="com.wcyv90.x.tcc.tx.core.TccTransaction" id="tccTx">
-        <id column="ID" property="id"/>
-        <result column="TCC_TX_ID" property="tccTxId"/>
-        <result column="PHASE" property="phase"/>
-        <result column="TYPE" property="type"/>
-        <result column="COMPENSATION_EVENT" property="compensationEvent"/>
-        <result column="COMPENSATION_INFO" property="compensationInfo"/>
-        <result column="CREATE_TIME" property="createTime"/>
-        <result column="UPDATE_TIME" property="updateTime"/>
-        <result column="RETRY_TIMES" property="retryTimes"/>
+        <id column="id" property="id"/>
+        <result column="tcc_tx_id" property="tccTxId"/>
+        <result column="phase" property="phase"/>
+        <result column="type" property="type"/>
+        <result column="compensation_event" property="compensationEvent"/>
+        <result column="compensation_info" property="compensationInfo"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="retry_times" property="retryTimes"/>
     </resultMap>
 
     <select id="getByTccTxIdForUpdate" resultMap="tccTx">
         SELECT
-            `ID`, `TCC_TX_ID`, `PHASE`, `TYPE`, `COMPENSATION_EVENT`,
-            `COMPENSATION_INFO`, `CREATE_TIME`, `UPDATE_TIME`, `RETRY_TIMES`
+            `id`, `tcc_tx_id`, `phase`, `type`, `compensation_event`,
+            `compensation_info`, `create_time`, `update_time`, `retry_times`
         FROM
-            `X_TCC_TRANSACTION`
+            `x_tcc_transaction`
         WHERE
-            `TCC_TX_ID` = #{tccTxId}
+            `tcc_tx_id` = #{tccTxId}
         FOR UPDATE
     </select>
 
     <insert id="save">
         INSERT INTO
-            `X_TCC_TRANSACTION` (
-            `TCC_TX_ID`, `PHASE`, `TYPE`, `COMPENSATION_EVENT`,
-            `COMPENSATION_INFO`, `CREATE_TIME`, `UPDATE_TIME`, `RETRY_TIMES`)
+            `x_tcc_transaction` (
+            `tcc_tx_id`, `phase`, `type`, `compensation_event`,
+            `compensation_info`, `create_time`, `update_time`, `retry_times`)
         VALUE (
             #{tccTx.tccTxId}, #{tccTx.phase}, #{tccTx.type}, #{tccTx.compensationEvent},
             #{tccTx.compensationInfo}, now(), now(), #{tccTx.retryTimes}
@@ -37,28 +37,28 @@
 
     <update id="update">
         UPDATE
-            `X_TCC_TRANSACTION`
+            `x_tcc_transaction`
         SET
-            `PHASE` = #{tccTx.phase}, `UPDATE_TIME` = now(), `RETRY_TIMES` = #{tccTx.retryTimes}
+            `phase` = #{tccTx.phase}, `update_time` = now(), `retry_times` = #{tccTx.retryTimes}
         WHERE
-            TCC_TX_ID = #{tccTx.tccTxId}
+            `tcc_tx_id` = #{tccTx.tccTxId}
     </update>
 
     <delete id="delete">
         DELETE FROM
-            `X_TCC_TRANSACTION`
+            `x_tcc_transaction`
         WHERE
-            TCC_TX_ID = #{tccTxId}
+            `tcc_tx_id` = #{tccTxId}
     </delete>
 
     <select id="getRootTccTransactions" resultMap="tccTx">
         SELECT
-            `ID`, `TCC_TX_ID`, `PHASE`, `TYPE`, `COMPENSATION_EVENT`,
-            `COMPENSATION_INFO`, `CREATE_TIME`, `UPDATE_TIME`, `RETRY_TIMES`
+            `id`, `tcc_tx_id`, `phase`, `type`, `compensation_event`,
+            `compensation_info`, `create_time`, `update_time`, `retry_times`
         FROM
-            `X_TCC_TRANSACTION`
+            `x_tcc_transaction`
         WHERE
-            `TYPE` = "ROOT"
+            `type` = "ROOT"
     </select>
 
 </mapper>

@@ -2,30 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.wcyv90.x.tcc.account.service.mapper.AccountMapper">
     <resultMap id="account" type="com.wcyv90.x.tcc.account.domain.model.Account">
-        <id column="ID" property="id"/>
-        <result column="TOTAL_AMOUNT" property="totalAmount"/>
-        <result column="UPDATE_TIME" property="updateTime"/>
+        <id column="id" property="id"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="getByIdForUpdate" resultMap="account">
         SELECT
-            `ID`,
-            `TOTAL_AMOUNT`,
-            `UPDATE_TIME`
+            `id`,
+            `total_amount`,
+            `update_time`
         FROM
-            `X_ACCOUNT`
+            `x_account`
         WHERE
-            `ID`=#{id}
+            `id`=#{id}
         FOR UPDATE
     </select>
 
     <update id="update">
         UPDATE
-            `X_ACCOUNT`
+            `x_account`
         SET
-            `TOTAL_AMOUNT`=#{account.totalAmount}, `UPDATE_TIME`=now()
+            `total_amount`=#{account.totalAmount}, `update_time`=now()
         WHERE
-            `ID`=#{account.id}
+            `id`=#{account.id}
     </update>
 
 </mapper>

@@ -2,30 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.wcyv90.x.tcc.order.service.mapper.OrderMapper">
     <resultMap id="order" type="com.wcyv90.x.tcc.order.domain.model.Order">
-        <id column="ID" property="id"/>
-        <result column="PRICE_AMOUNT" property="priceAmount"/>
-        <result column="PAID_AMOUNT" property="paidAmount"/>
+        <id column="id" property="id"/>
+        <result column="price_amount" property="priceAmount"/>
+        <result column="paid_amount" property="paidAmount"/>
     </resultMap>
 
     <select id="getByIdForUpdate" resultMap="order">
         SELECT
-            `ID`,
-            `PRICE_AMOUNT`,
-            `PAID_AMOUNT`
+            `id`,
+            `price_amount`,
+            `paid_amount`
         FROM
-            `X_ORDER`
+            `x_order`
         WHERE
-            `ID`=#{id}
+            `id`=#{id}
         FOR UPDATE
     </select>
 
     <update id="update">
         UPDATE
-            `X_ORDER`
+            `x_order`
         SET
-            `PAID_AMOUNT` = #{order.paidAmount}
+            `paid_amount` = #{order.paidAmount}
         WHERE
-            `ID`=#{order.id}
+            `id`=#{order.id}
     </update>
 
 </mapper>

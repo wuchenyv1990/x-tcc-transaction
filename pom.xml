@@ -18,6 +18,7 @@
         <lombok.version>1.18.8</lombok.version>
         <mybatis.boot.version>2.1.0</mybatis.boot.version>
         <mysql.driver.version>8.0.15</mysql.driver.version>
+        <shedlock.version>4.12.0</shedlock.version>
         <spring.boot.version>2.1.8.RELEASE</spring.boot.version>
         <spring.cloud.version>Greenwich.SR3</spring.cloud.version>
     </properties>
@@ -71,6 +72,25 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-spring</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+            <!-- shedlock impl alternative -->
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-provider-jdbc-template</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-provider-redis-spring</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+            <!-- ... -->
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
